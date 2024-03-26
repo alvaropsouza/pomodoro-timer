@@ -30,9 +30,10 @@ export function Home() {
           <MinutesAmountInput
             type="number"
             id="minutesAmount"
-            placeholder="00"
+            placeholder="5"
             step={5}
             min={5}
+            defaultValue={5}
             max={60}
           />
           <span>Minutos</span>

@@ -1,4 +1,4 @@
-import { Play } from 'phosphor-react'
+import { Play, Stop } from 'phosphor-react'
 import {
   CountdownContainer,
   FormContainer,
@@ -6,6 +6,7 @@ import {
   MinutesAmountInput,
   Separator,
   StartCountdownButton,
+  StopCountdownButton,
   TaskInput,
 } from './styles'
 import { useForm } from 'react-hook-form'
@@ -44,12 +45,17 @@ export function Home() {
   const activeCycle = cycles.find(({ id }) => id === activeCycleId)
 
   useEffect(() => {
+    let interval: number
     if (activeCycle) {
-      setInterval(() => {
+      interval = setInterval(() => {
         setElapsedSeconds(
           differenceInSeconds(new Date(), activeCycle.startDate),
         )
       }, 1000)
+    }
+
+    return () => {
+      clearInterval(interval)
     }
   }, [activeCycle])
 
@@ -66,6 +72,7 @@ export function Home() {
 
     setCycles((cycles) => [...cycles, newCycle])
     setActiveCycleId(id)
+    setElapsedSeconds(0)
     reset()
   }
 
@@ -77,6 +84,14 @@ export function Home() {
 
   const minutes = String(minutesAmount).padStart(2, '0')
   const seconds = String(secondsAmount).padStart(2, '0')
+
+  useEffect(() => {
+    if (activeCycle) {
+      document.title = `Pomodoro Timer - ${minutes}:${seconds}`
+    } else {
+      document.title = 'Pomodoro Timer'
+    }
+  }, [activeCycle, minutes, seconds])
 
   const task = watch('task')
   const isSubmitDisabled = !task
@@ -117,10 +132,15 @@ export function Home() {
           <span>{seconds[0]}</span>
           <span>{seconds[1]}</span>
         </CountdownContainer>
-
-        <StartCountdownButton type="submit" disabled={isSubmitDisabled}>
-          <Play /> Começar
-        </StartCountdownButton>
+        {activeCycle ? (
+          <StopCountdownButton type="button">
+            <Stop /> Parar
+          </StopCountdownButton>
+        ) : (
+          <StartCountdownButton type="submit" disabled={isSubmitDisabled}>
+            <Play /> Começar
+          </StartCountdownButton>
+        )}
       </form>
     </HomeContainer>
   )
